@@ -1,0 +1,162 @@
+BUG LOG
+
+**************************************** CHECKPOINT 5 ****************************************
+-----------------
+FILE/FUNCTION: pit_handler
+BUG: crash on first three shells
+DIFFICULTY: epic, 50-eceber hours
+SOLUTION: Two main problems were with saving ebp and esp before switching tasks. The first we did not save on normal switches, causing crashing randomly. 
+The other problem was that we did not save the ebp and esp before executing, so it was wrong for the first three shells.
+-----------------
+FILE/FUNCTION: terminal_switch
+BUG: fish flashing when switching terminal
+DIFFICULTY: 2 hrs
+SOLUTION: our terminal switch was not correctly switching video memory in the table, causing it to flicker randomly, cuz it was overwriting
+-----------------
+FILE/FUNCTION: pit_handler
+BUG: random crash on first three shells
+DIFFICULTY: 1 hr, but really more like 50 hours
+SOLUTION: we were using the wrong variable and not setting up the context switch correctly. We ended up saving the ESP and EBP right before calling execute, which fixed it.
+-----------------
+FILE/FUNCTION: lib.c, putc
+BUG: everything is printing everywhere
+DIFFICULTY: 6 hrs
+SOLUTION: our putc function was not writing to the correct video_mem, causing overlap between programs and general problems, to solve it we rewrote the lib fncs to 
+write to a specific terminal
+-----------------
+FILE/FUNCTION: read_dir
+BUG: Running "cat ." was failing, since it wasn't recognizing it as a file.
+DIFFICULTY: 10 minutes
+SOLUTION: We had a dumb conditional that was checking file name length. Removing that fixed it.
+-----------------
+FILE/FUNCTION: pit_handler 
+BUG: unstable page faulting
+DIFFICULTY: 50 hours
+SOLUTION: This was tied to our first bug, but fixing the esp and ebp and correctly terminal switching fixed this. We also prevented keyboard interrupts until the terminals finished booting.
+-----------------
+**************************************** CHECKPOINT 4 ****************************************
+-----------------
+FILE/FUNCTION: read_dentry_by_name
+BUG: read_dentry_by_name was returning that the file was not found when the file name was 32 characters long
+DIFFICULTY: 20 minutes
+SOLUTION: We were checking the length of the file name, which was return the wrong value. Instead, we used only the strcmp function. 
+-----------------
+**************************************** CHECKPOINT 3 ****************************************
+-----------------
+FILE/FUNCTION: syscall.c
+BUG: Test cases do not properly call terminal_read and terminal_write.
+DIFFICULTY: 2 hours
+SOLUTION: We were checking to make sure if fd was >= 2 which was incorrect since stdin and stdout are 0 and 1 respectively.
+-----------------
+FILE/FUNCTION: syscall_asm.S
+BUG: page faulting during return from tasks
+SOLUTION: We were doing iret between tasks, which was incorrect and messing up all the pointers and stacks. We had to instead
+perform normal rets during tasks.
+DIFFICULTY: 6 hours, this was not fun to find
+-----------------
+FILE/FUNCTION: syscall_helper
+BUG: fourth character gets replaced by a NULL
+SOLUTION: We were accidently replacing eax in our asm, by pushing and popping, causing it to completely trash the nbytes to write and use 3 (call # from previous eax input)
+DIFFICULTY: 1 hours
+-----------------
+FILE/FUNCTION: read_directory
+BUG: ls program only prints the first line
+SOLUTION: We realized we were returning 0 somehwere instead of the number of bytes
+DIFFICULTY: 1 hour
+-----------------
+FILE/FUNCTION: syscall
+BUG: opening shell within shell doesn't do anything, misunderstanding
+SOLUTION: We had no idea what we were doing, and we realized our implementation was correct.
+DIFFICULTY: 12 hours
+-----------------
+FILE/FUNCTION: syscall_asm
+BUG: general protection fault
+SOLUTION: while we were trying to fix the page fault we went backwards and caused some general protection faults, This was 
+because we were accessing some kernel data in our user sections
+DIFFICULTY: 1 hour
+-----------------
+FILE/FUNCTION: dir_read
+BUG: running ls executable caused verylargetext.. name to print infinitely.
+SOLUTION: Stopped using strcpy/memcpy and just made a for loop.
+DIFFICULTY: 20 minutes
+-----------------
+**************************************** CHECKPOINT 2 ****************************************
+-----------------
+FILE/FUNCTION: file_read()
+BUG: The file that we were trying to access was always showing as unavailable/invalid. 
+SOLUTION: We were setting the flags incorrectly in the file descriptor. However, we realized that our file descriptor idea was incorrect so we just ended up redoing it.
+DIFFICULTY: 45 minutes
+-----------------
+FILE/FUNCTION: Testing file_read with executables
+BUG: When using file read with the 'grep' executable, the program printed out errors about not being able to read the file. 
+SOLUTION: The 'grep' executable does actually have those characters, and was too large to be printed onto the screen. We switched to printing the 'hello' executable instead.
+DIFFICULTY: 30 minutes
+-----------------
+FILE/FUNCTION: read_data()
+BUG: The read_data() function would only read a few bytes from the file and then stop.
+SOLUTION: We realized that we were not incrementing the current byte index correctly. We stopped it at length, instead of length + offset.
+DIFFICULTY: 10 minutes
+-----------------
+FILE/FUNCTION: terminal/keyboard writing
+BUG: moving text up for new line causing weird graphical errors
+DIFFICULTY: 30 min
+SOLUTION: when I tried to move the screen up the entire screen would change color and fill with random characters. I realized that when I
+was rewriting bytes in video memory to move the characters up, I was writing byte by byte instead of every other byte. This caused the colors
+to change because the 2nd byte is the color of that character. To fix this I changed every other byte in my iteration.
+-----------------
+FILE/FUNCTION: rtc_write
+BUG: the rtc tests where not going to the frequency I was setting it to
+DIFFICULTY: 1 hr
+SOLUTION: I was using an unsigned char to store the input frequency which was limiting it to 255 Hz. To fix this bug I replaced it with an int
+to hold all inputs from 2-1024 Hz.
+-----------------
+FILE/FUNCTION: terminal/keyboard roles
+BUG: More of a conceptual misunderstanding of what terminal should do
+DIFFICULTY: 3 hrs
+SOLUTION: I initially used the terminal to handle the printing and did not even have a buffer. Once we realized that terminal was supposed to maintain
+the buffer and keyboard is meant to do more of the printing, we had to re-organize our code and add the buffer along with checks for proper handling.
+-----------------
+
+**************************************** CHECKPOINT 1 ****************************************
+-----------------
+FILE/FUNCTION: x86_desc.S
+BUG: Kernel kept looping over and over again.
+SOLUTION: GDT wasn't loaded correctly (we were using the wrong descriptor pointer with the lgdt command).
+DIFFICULTY: 2 hours
+-----------------
+FILE/FUNCTION: rtc.c - handler
+BUG: rtc was not never interrupting and calling the handler.
+SOLUTION: We realized that we had done everything right, but had not enabled irq2 on 
+the primary PIC, after enabling irq0 on the secondary.
+-----------------
+FILE/FUNCTION: asm_linkage.S - keyboard.c/h
+BUG: Our keyboard was only recieving the very first input interrupt, then not getting anymore.
+SOLUTION: We had not created the ASM linkage for the interrupts, causing the interrupt flag to 
+prevent more interrupts each time an interrupt was called. We added the linkage code to call
+iret, causing the orginal eflags to be set and allow more interrupts.
+-----------------
+FILE/FUNCTION: paging_asm.S
+BUG: Saying there was an implicit declaration for function when we clearly had created the functions.
+SOLUTION: It turns out that having the same assembly file name as your header file does not work. So, we changed paging.S to paging_asm.S
+-----------------
+FILE/FUNCTION: paging.c/h - setup
+BUG: Our code was crashing right when we started. the values in our assembly code was incorrect.
+SOLUTION: We realized that we where passing the incorrect values of memory to the assembly functions, causing it to map incorrectly.
+We had to use &page_dir instead of just page_dir.
+-----------------
+FILE/FUNCTION: keyboard.c
+BUG: After we press a key on the keyboard, letting go would also trigger an interrupt and print a character.
+SOLUTION: To fix this error we realized that the let go characters where the pressed char + 128, so we just
+did a check to filter out higher idx characters.
+-----------------
+FILE/FUNCTION: keyboard.c
+BUG: Keyboard receiving inputs but only printing out numbers instead of characters.
+SOLUTION: Had to map the corresponding values received from the interrupt into the correct keyboard characters. We used a char
+array and indexed the numbers printed out to corresponding keyboard characters.
+-----------------
+FILE/FUNCTION: idt.c
+BUG: Double fault error keeps happening when loading idt.
+SOLUTION: We forgot to actually initialize the idt itself in the kernel.c file, which caused a double fault (found through GDB).
+DIFFICULTY: 2 hours
+-----------------
+

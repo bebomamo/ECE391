@@ -1,0 +1,71 @@
+No bugs for draw_vert_line function…
+
+Bug 1:
+Type of problem: cannot get status bar to not move
+difficulty(by time): 1 day
+Difficulty(to fix): 1 line
+Solution: setting a different value for target_image( to be the beginning of the top window)
+
+Bug 2: 
+Type: screen splits halfway through even when field was set to split further down
+Time difficulty: 3 hrs
+Fix Difficulty: 1 line
+Solution: Here I needed to figure out that the max scan line field is representing the row counter as (max_scan_line) + 1 per scan line row, so the amount of rows down I wanted actually needed to be multiplied by 2. This being said I hardcoded my row to 2*its previous value that I wanted.
+
+Bug 3: 
+Type: Can’t draw colored status bar over status bar position
+Time difficulty: 1.5 hours
+Fix difficulty: 1 line and discovery of a function
+Solution: Repurposing the copy_image function but only changing memory of the size of the status bar and starting at position 0x0(where the bar starts in video memory.)
+
+Bug 4: 
+Type: status bar color is staying as just one color, even though I used a remapping function to make a rastorized image into a plane base image.
+Time difficulty: 2 hours
+Fix difficulty: less than 20 lines
+Solution: forgetting to put break; statements in switch/case statements which I use for my text to graphical function and my striped status bar maker routine. 
+
+Bug 5:
+Type : forgot to make the image in a plane based buffer and instead made it in a rastorized buffer
+time difficulty: 2 hours
+fix difficulty: <20 lines and a new function
+solution: making a new function that converts a rastor function to a plane function
+
+Bug 6:
+Type: odd activity when trying to access the status message (very hard to descibe)
+time difficulty: 20 minutes
+fix difficult: about 2 lines and function hunting
+solution: using the lock to synchronize access to the status message
+
+Bug 7:
+Type: underscore isn't present when command length == 0 and is always present even when string is max length
+time difficulty: 1 hour
+fix difficulty: <20 lines
+solution: some if conditions in convenient spots that either add the underscore or ensure it isn't added
+
+2.2 bugs
+
+Bug 1: 
+Type: blackscreen when testing tux controller
+time difficulty: 3 hour
+fix difficulty: 2 lines
+solution: calling tux put function with (char*)ONE_OF_THE_COMMANDS doesn't work and you need make another variable 
+storing the value of the command to use in the call, (maybe because the commands are #define not const variables?)
+
+Bug 2: 
+Type: oct_node fields ruined after qsort even with a seemingly correct call and compare function
+time difficulty: 6 hour
+fix difficulty: 10-15 lines
+solution: I got advice to instead make a octree struct made up of octree nodes and for some reason this worked
+
+Bug 3: 
+Type: Weird counting order on tux controller while playing game
+time difficulty: 1 hour
+fix difficulty: 5ish lines
+solution: I didn't realize that when we make the display_time_on_tux function, that argument is directly the argument 
+we recieve in the tux_set_led ioctl function. That being said all I had to do was read the last 16 bits of 16 slightly differently.
+
+Bug 4: 
+Type: incorrect pixel coloring from octree
+time difficulty: 4 hours
+fix difficulty: 20-30 lines
+solution: significant changes in how I read back my rrrrggggbbbb index after sort
